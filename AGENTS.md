@@ -5,6 +5,22 @@
 - All of `bun fmt`, `bun lint`, and `bun typecheck` must pass before considering tasks completed.
 - NEVER run `bun test`. Always use `bun run test` (runs Vitest).
 
+## Patch Layer Branch Guidance
+
+- The current patch-layer implementation lives on `feat/patch-layer`.
+- The personal fork for this branch is `https://github.com/BurgessTG/t3code`.
+- Do not open a PR against `pingdotgg/t3code` and do not push to the upstream `origin` unless the user explicitly asks for that.
+- If this checkout was cloned from the personal fork, `origin` is safe for branch pushes. If this checkout still points at `pingdotgg/t3code`, add or use a separate fork remote such as `personal` before pushing anything.
+- On a fresh machine, validate this branch with:
+  - `bun install`
+  - `bun fmt`
+  - `bun lint`
+  - `bun typecheck`
+  - `bun run test`
+- For patch-layer specific testing, use the local fixture workflow in `docs/patch-layer-local-testing.md`.
+- The fixture entrypoint is `bun run patch:fixture -- --scenario <clean|content-conflict|rename-conflict|validation-failure>`.
+- For manual UI verification, start the app with `bun run dev` or `bun run dev:desktop`, create a local fixture, and exercise the Patch control against the generated fork workspace instead of a real GitHub fork first.
+
 ## Project Snapshot
 
 T3 Code is a minimal web GUI for using coding agents like Codex and Claude.
