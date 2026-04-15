@@ -43,6 +43,31 @@ brew install --cask t3-code
 yay -S t3code-bin
 ```
 
+## Patch Layer Branch
+
+This branch (`feat/patch-layer`) adds a fork-aware patch workflow for keeping a customized fork aligned with upstream in a sandbox worktree.
+
+To test this exact branch on another machine:
+
+```bash
+git clone https://github.com/BurgessTG/t3code.git
+cd t3code
+git checkout feat/patch-layer
+bun install
+bun fmt
+bun lint
+bun typecheck
+bun run test
+```
+
+For local reconcile testing without GitHub:
+
+```bash
+bun run patch:fixture -- --scenario clean
+```
+
+See [docs/patch-layer-local-testing.md](./docs/patch-layer-local-testing.md) for the fixture flow, expected scenarios, and manual validation loop.
+
 ## Some notes
 
 We are very very early in this project. Expect bugs.
