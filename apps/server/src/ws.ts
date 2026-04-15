@@ -77,6 +77,7 @@ import { VcsStatusBroadcaster } from "./vcs/VcsStatusBroadcaster.ts";
 import { VcsProvisioningService } from "./vcs/VcsProvisioningService.ts";
 import { GitWorkflowService } from "./git/GitWorkflowService.ts";
 import { ReviewService } from "./review/ReviewService.ts";
+import { PatchService } from "./patch/Services/PatchService.ts";
 import { ProjectSetupScriptRunner } from "./project/Services/ProjectSetupScriptRunner.ts";
 import { RepositoryIdentityResolver } from "./project/Services/RepositoryIdentityResolver.ts";
 import { ServerEnvironment } from "./environment/Services/ServerEnvironment.ts";
@@ -171,6 +172,13 @@ const RPC_REQUIRED_SCOPE = new Map<string, AuthEnvironmentScope>([
   [WS_METHODS.vcsSwitchRef, AuthOrchestrationOperateScope],
   [WS_METHODS.vcsInit, AuthOrchestrationOperateScope],
   [WS_METHODS.reviewGetDiffPreview, AuthReviewWriteScope],
+  [WS_METHODS.patchStatus, AuthOrchestrationReadScope],
+  [WS_METHODS.patchGenerateProfile, AuthOrchestrationOperateScope],
+  [WS_METHODS.patchReconcile, AuthOrchestrationOperateScope],
+  [WS_METHODS.patchGetRun, AuthOrchestrationReadScope],
+  [WS_METHODS.patchApply, AuthOrchestrationOperateScope],
+  [WS_METHODS.patchOpenSandbox, AuthOrchestrationReadScope],
+  [WS_METHODS.patchDiscardRun, AuthOrchestrationOperateScope],
   [WS_METHODS.terminalOpen, AuthTerminalOperateScope],
   [WS_METHODS.terminalAttach, AuthTerminalOperateScope],
   [WS_METHODS.terminalWrite, AuthTerminalOperateScope],
@@ -237,6 +245,7 @@ const makeWsRpcLayer = (currentSession: AuthenticatedSession) =>
       const externalLauncher = yield* ExternalLauncher.ExternalLauncher;
       const gitWorkflow = yield* GitWorkflowService;
       const review = yield* ReviewService;
+      const patch = yield* PatchService;
       const vcsProvisioning = yield* VcsProvisioningService;
       const vcsStatusBroadcaster = yield* VcsStatusBroadcaster;
       const terminalManager = yield* TerminalManager;
@@ -1292,6 +1301,36 @@ const makeWsRpcLayer = (currentSession: AuthenticatedSession) =>
         [WS_METHODS.reviewGetDiffPreview]: (input) =>
           observeRpcEffect(WS_METHODS.reviewGetDiffPreview, review.getDiffPreview(input), {
             "rpc.aggregate": "review",
+          }),
+        [WS_METHODS.patchStatus]: (input) =>
+          observeRpcEffect(WS_METHODS.patchStatus, patch.status(input), {
+            "rpc.aggregate": "patch",
+          }),
+        [WS_METHODS.patchGenerateProfile]: (input) =>
+          observeRpcEffect(WS_METHODS.patchGenerateProfile, patch.generateProfile(input), {
+            "rpc.aggregate": "patch",
+          }),
+        [WS_METHODS.patchReconcile]: (input) =>
+          observeRpcEffect(WS_METHODS.patchReconcile, patch.reconcile(input), {
+            "rpc.aggregate": "patch",
+          }),
+        [WS_METHODS.patchGetRun]: (input) =>
+          observeRpcEffect(WS_METHODS.patchGetRun, patch.getRun(input), {
+            "rpc.aggregate": "patch",
+          }),
+        [WS_METHODS.patchApply]: (input) =>
+          observeRpcEffect(
+            WS_METHODS.patchApply,
+            patch.apply(input).pipe(Effect.tap(() => refreshGitStatus(input.cwd))),
+            { "rpc.aggregate": "patch" },
+          ),
+        [WS_METHODS.patchOpenSandbox]: (input) =>
+          observeRpcEffect(WS_METHODS.patchOpenSandbox, patch.openSandbox(input), {
+            "rpc.aggregate": "patch",
+          }),
+        [WS_METHODS.patchDiscardRun]: (input) =>
+          observeRpcEffect(WS_METHODS.patchDiscardRun, patch.discardRun(input), {
+            "rpc.aggregate": "patch",
           }),
         [WS_METHODS.terminalOpen]: (input) =>
           observeRpcEffect(WS_METHODS.terminalOpen, terminalManager.open(input), {

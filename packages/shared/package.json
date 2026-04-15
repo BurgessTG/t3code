@@ -19,6 +19,10 @@
       "types": "./src/git.ts",
       "import": "./src/git.ts"
     },
+    "./patch": {
+      "types": "./src/patch.ts",
+      "import": "./src/patch.ts"
+    },
     "./sourceControl": {
       "types": "./src/sourceControl.ts",
       "import": "./src/sourceControl.ts"

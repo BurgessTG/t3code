@@ -138,6 +138,15 @@ vi.mock("@t3tools/client-runtime", async (importOriginal) => {
     review: {
       getDiffPreview: vi.fn(),
     },
+    patch: {
+      status: vi.fn(),
+      generateProfile: vi.fn(),
+      reconcile: vi.fn(),
+      getRun: vi.fn(),
+      apply: vi.fn(),
+      openSandbox: vi.fn(),
+      discardRun: vi.fn(),
+    },
     server: {
       getConfig: vi.fn(),
       refreshProviders: vi.fn(),

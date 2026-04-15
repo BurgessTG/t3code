@@ -125,6 +125,15 @@ export interface WsRpcClient {
   readonly review: {
     readonly getDiffPreview: RpcUnaryMethod<typeof WS_METHODS.reviewGetDiffPreview>;
   };
+  readonly patch: {
+    readonly status: RpcUnaryMethod<typeof WS_METHODS.patchStatus>;
+    readonly generateProfile: RpcUnaryMethod<typeof WS_METHODS.patchGenerateProfile>;
+    readonly reconcile: RpcUnaryMethod<typeof WS_METHODS.patchReconcile>;
+    readonly getRun: RpcUnaryMethod<typeof WS_METHODS.patchGetRun>;
+    readonly apply: RpcUnaryMethod<typeof WS_METHODS.patchApply>;
+    readonly openSandbox: RpcUnaryMethod<typeof WS_METHODS.patchOpenSandbox>;
+    readonly discardRun: RpcUnaryMethod<typeof WS_METHODS.patchDiscardRun>;
+  };
   readonly server: {
     readonly getConfig: RpcUnaryNoArgMethod<typeof WS_METHODS.serverGetConfig>;
     readonly refreshProviders: (
@@ -285,6 +294,19 @@ export function createWsRpcClient(
     review: {
       getDiffPreview: (input) =>
         transport.request((client) => client[WS_METHODS.reviewGetDiffPreview](input)),
+    },
+    patch: {
+      status: (input) => transport.request((client) => client[WS_METHODS.patchStatus](input)),
+      generateProfile: (input) =>
+        transport.request((client) => client[WS_METHODS.patchGenerateProfile](input)),
+      reconcile: (input) =>
+        transport.request((client) => client[WS_METHODS.patchReconcile](input)),
+      getRun: (input) => transport.request((client) => client[WS_METHODS.patchGetRun](input)),
+      apply: (input) => transport.request((client) => client[WS_METHODS.patchApply](input)),
+      openSandbox: (input) =>
+        transport.request((client) => client[WS_METHODS.patchOpenSandbox](input)),
+      discardRun: (input) =>
+        transport.request((client) => client[WS_METHODS.patchDiscardRun](input)),
     },
     server: {
       getConfig: () => transport.request((client) => client[WS_METHODS.serverGetConfig]({})),

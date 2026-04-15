@@ -48,6 +48,15 @@ export function createEnvironmentApi(rpcClient: WsRpcClient): EnvironmentApi {
     review: {
       getDiffPreview: rpcClient.review.getDiffPreview,
     },
+    patch: {
+      status: rpcClient.patch.status,
+      generateProfile: rpcClient.patch.generateProfile,
+      reconcile: rpcClient.patch.reconcile,
+      getRun: rpcClient.patch.getRun,
+      apply: rpcClient.patch.apply,
+      openSandbox: rpcClient.patch.openSandbox,
+      discardRun: rpcClient.patch.discardRun,
+    },
     orchestration: {
       dispatchCommand: rpcClient.orchestration.dispatchCommand,
       getTurnDiff: rpcClient.orchestration.getTurnDiff,

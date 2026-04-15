@@ -8,6 +8,7 @@ import {
 import { scopeThreadRef } from "@t3tools/client-runtime";
 import { memo } from "react";
 import GitActionsControl from "../GitActionsControl";
+import PatchControl from "../../features/patch/PatchControl";
 import { type DraftId } from "~/composerDraftStore";
 import { DiffIcon, TerminalSquareIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
@@ -136,6 +137,13 @@ export const ChatHeader = memo(function ChatHeader({
             gitCwd={gitCwd}
             activeThreadRef={scopeThreadRef(activeThreadEnvironmentId, activeThreadId)}
             {...(draftId ? { draftId } : {})}
+          />
+        )}
+        {activeProjectName && isGitRepo && (
+          <PatchControl
+            environmentId={activeThreadEnvironmentId}
+            gitCwd={gitCwd}
+            activeThreadId={activeThreadId}
           />
         )}
         <Tooltip>

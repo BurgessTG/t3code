@@ -43,6 +43,22 @@ import {
   ReviewDiffPreviewInput,
   ReviewDiffPreviewResult,
 } from "./review.ts";
+import {
+  PatchApplyInput,
+  PatchApplyResult,
+  PatchDiscardRunInput,
+  PatchDiscardRunResult,
+  PatchGenerateProfileInput,
+  PatchGenerateProfileResult,
+  PatchGetRunInput,
+  PatchOpenSandboxInput,
+  PatchOpenSandboxResult,
+  PatchReconcileInput,
+  PatchRun,
+  PatchServiceError,
+  PatchStatusInput,
+  PatchStatusResult,
+} from "./patch.ts";
 import { KeybindingsConfigError } from "./keybindings.ts";
 import {
   ClientOrchestrationCommand,
@@ -147,6 +163,15 @@ export const WS_METHODS = {
 
   // Review methods
   reviewGetDiffPreview: "review.getDiffPreview",
+
+  // Patch layer methods
+  patchStatus: "patch.status",
+  patchGenerateProfile: "patch.generateProfile",
+  patchReconcile: "patch.reconcile",
+  patchGetRun: "patch.getRun",
+  patchApply: "patch.apply",
+  patchOpenSandbox: "patch.openSandbox",
+  patchDiscardRun: "patch.discardRun",
 
   // Terminal methods
   terminalOpen: "terminal.open",
@@ -415,6 +440,48 @@ export const WsReviewGetDiffPreviewRpc = Rpc.make(WS_METHODS.reviewGetDiffPrevie
   error: Schema.Union([ReviewDiffPreviewError, EnvironmentAuthorizationError]),
 });
 
+export const WsPatchStatusRpc = Rpc.make(WS_METHODS.patchStatus, {
+  payload: PatchStatusInput,
+  success: PatchStatusResult,
+  error: Schema.Union([PatchServiceError, EnvironmentAuthorizationError]),
+});
+
+export const WsPatchGenerateProfileRpc = Rpc.make(WS_METHODS.patchGenerateProfile, {
+  payload: PatchGenerateProfileInput,
+  success: PatchGenerateProfileResult,
+  error: Schema.Union([PatchServiceError, EnvironmentAuthorizationError]),
+});
+
+export const WsPatchReconcileRpc = Rpc.make(WS_METHODS.patchReconcile, {
+  payload: PatchReconcileInput,
+  success: PatchRun,
+  error: Schema.Union([PatchServiceError, EnvironmentAuthorizationError]),
+});
+
+export const WsPatchGetRunRpc = Rpc.make(WS_METHODS.patchGetRun, {
+  payload: PatchGetRunInput,
+  success: PatchRun,
+  error: Schema.Union([PatchServiceError, EnvironmentAuthorizationError]),
+});
+
+export const WsPatchApplyRpc = Rpc.make(WS_METHODS.patchApply, {
+  payload: PatchApplyInput,
+  success: PatchApplyResult,
+  error: Schema.Union([PatchServiceError, EnvironmentAuthorizationError]),
+});
+
+export const WsPatchOpenSandboxRpc = Rpc.make(WS_METHODS.patchOpenSandbox, {
+  payload: PatchOpenSandboxInput,
+  success: PatchOpenSandboxResult,
+  error: Schema.Union([PatchServiceError, EnvironmentAuthorizationError]),
+});
+
+export const WsPatchDiscardRunRpc = Rpc.make(WS_METHODS.patchDiscardRun, {
+  payload: PatchDiscardRunInput,
+  success: PatchDiscardRunResult,
+  error: Schema.Union([PatchServiceError, EnvironmentAuthorizationError]),
+});
+
 export const WsTerminalOpenRpc = Rpc.make(WS_METHODS.terminalOpen, {
   payload: TerminalOpenInput,
   success: TerminalSessionSnapshot,
@@ -580,6 +647,13 @@ export const WsRpcGroup = RpcGroup.make(
   WsVcsSwitchRefRpc,
   WsVcsInitRpc,
   WsReviewGetDiffPreviewRpc,
+  WsPatchStatusRpc,
+  WsPatchGenerateProfileRpc,
+  WsPatchReconcileRpc,
+  WsPatchGetRunRpc,
+  WsPatchApplyRpc,
+  WsPatchOpenSandboxRpc,
+  WsPatchDiscardRunRpc,
   WsTerminalOpenRpc,
   WsTerminalAttachRpc,
   WsTerminalWriteRpc,

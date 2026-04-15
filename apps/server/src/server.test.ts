@@ -77,6 +77,7 @@ import {
 import { GitManager, type GitManagerShape } from "./git/GitManager.ts";
 import { Keybindings, type KeybindingsShape } from "./keybindings.ts";
 import * as ExternalLauncher from "./process/externalLauncher.ts";
+import { PatchService, type PatchServiceShape } from "./patch/Services/PatchService.ts";
 import {
   OrchestrationEngineService,
   type OrchestrationEngineShape,
@@ -349,6 +350,7 @@ const buildAppUnderTest = (options?: {
     gitManager?: Partial<GitManagerShape>;
     sourceControlRepositoryService?: Partial<SourceControlRepositoryService.SourceControlRepositoryServiceShape>;
     reviewService?: Partial<ReviewService.ReviewServiceShape>;
+    patchService?: Partial<PatchServiceShape>;
     vcsStatusBroadcaster?: Partial<VcsStatusBroadcaster.VcsStatusBroadcasterShape>;
     projectSetupScriptRunner?: Partial<ProjectSetupScriptRunnerShape>;
     terminalManager?: Partial<TerminalManagerShape>;
@@ -645,6 +647,19 @@ const buildAppUnderTest = (options?: {
       Layer.provide(gitVcsDriverLayer),
       Layer.provide(gitWorkflowLayer),
       Layer.provide(reviewLayer),
+      Layer.provide(
+        Layer.mock(PatchService)({
+          status: () => Effect.die(new Error("Unexpected patch.status request.")),
+          generateProfile: () =>
+            Effect.die(new Error("Unexpected patch.generateProfile request.")),
+          reconcile: () => Effect.die(new Error("Unexpected patch.reconcile request.")),
+          getRun: () => Effect.die(new Error("Unexpected patch.getRun request.")),
+          apply: () => Effect.die(new Error("Unexpected patch.apply request.")),
+          openSandbox: () => Effect.die(new Error("Unexpected patch.openSandbox request.")),
+          discardRun: () => Effect.die(new Error("Unexpected patch.discardRun request.")),
+          ...options?.layers?.patchService,
+        }),
+      ),
       Layer.provide(vcsProvisioningLayer),
       Layer.provide(
         Layer.mock(SourceControlRepositoryService.SourceControlRepositoryService)({

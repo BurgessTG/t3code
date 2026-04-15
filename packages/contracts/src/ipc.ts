@@ -19,6 +19,21 @@ import type {
   VcsStatusResult,
 } from "./git.ts";
 import type { ReviewDiffPreviewInput, ReviewDiffPreviewResult } from "./review.ts";
+import type {
+  PatchApplyInput,
+  PatchApplyResult,
+  PatchDiscardRunInput,
+  PatchDiscardRunResult,
+  PatchGenerateProfileInput,
+  PatchGenerateProfileResult,
+  PatchGetRunInput,
+  PatchOpenSandboxInput,
+  PatchOpenSandboxResult,
+  PatchReconcileInput,
+  PatchRun,
+  PatchStatusInput,
+  PatchStatusResult,
+} from "./patch.ts";
 import type { FilesystemBrowseInput, FilesystemBrowseResult } from "./filesystem.ts";
 import type {
   ProjectSearchEntriesInput,
@@ -589,6 +604,15 @@ export interface EnvironmentApi {
   };
   review: {
     getDiffPreview: (input: ReviewDiffPreviewInput) => Promise<ReviewDiffPreviewResult>;
+  };
+  patch: {
+    status: (input: PatchStatusInput) => Promise<PatchStatusResult>;
+    generateProfile: (input: PatchGenerateProfileInput) => Promise<PatchGenerateProfileResult>;
+    reconcile: (input: PatchReconcileInput) => Promise<PatchRun>;
+    getRun: (input: PatchGetRunInput) => Promise<PatchRun>;
+    apply: (input: PatchApplyInput) => Promise<PatchApplyResult>;
+    openSandbox: (input: PatchOpenSandboxInput) => Promise<PatchOpenSandboxResult>;
+    discardRun: (input: PatchDiscardRunInput) => Promise<PatchDiscardRunResult>;
   };
   orchestration: {
     dispatchCommand: (command: ClientOrchestrationCommand) => Promise<{ sequence: number }>;
