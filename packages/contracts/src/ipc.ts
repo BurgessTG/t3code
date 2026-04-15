@@ -20,6 +20,22 @@ import type {
   GitStatusResult,
 } from "./git";
 import type {
+  PatchApplyInput,
+  PatchApplyResult,
+  PatchDiscardRunInput,
+  PatchDiscardRunResult,
+  PatchEvent,
+  PatchGenerateProfileInput,
+  PatchGenerateProfileResult,
+  PatchGetRunInput,
+  PatchOpenSandboxInput,
+  PatchOpenSandboxResult,
+  PatchReconcileInput,
+  PatchRun,
+  PatchStatusInput,
+  PatchStatusResult,
+} from "./patch";
+import type {
   ProjectSearchEntriesInput,
   ProjectSearchEntriesResult,
   ProjectWriteFileInput,
@@ -151,6 +167,16 @@ export interface NativeApi {
     status: (input: GitStatusInput) => Promise<GitStatusResult>;
     runStackedAction: (input: GitRunStackedActionInput) => Promise<GitRunStackedActionResult>;
     onActionProgress: (callback: (event: GitActionProgressEvent) => void) => () => void;
+  };
+  patch: {
+    status: (input: PatchStatusInput) => Promise<PatchStatusResult>;
+    generateProfile: (input: PatchGenerateProfileInput) => Promise<PatchGenerateProfileResult>;
+    reconcile: (input: PatchReconcileInput) => Promise<PatchRun>;
+    getRun: (input: PatchGetRunInput) => Promise<PatchRun>;
+    apply: (input: PatchApplyInput) => Promise<PatchApplyResult>;
+    openSandbox: (input: PatchOpenSandboxInput) => Promise<PatchOpenSandboxResult>;
+    discardRun: (input: PatchDiscardRunInput) => Promise<PatchDiscardRunResult>;
+    onEvent: (callback: (event: PatchEvent) => void) => () => void;
   };
   contextMenu: {
     show: <T extends string>(

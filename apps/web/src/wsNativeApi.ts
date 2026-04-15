@@ -4,6 +4,7 @@ import {
   ORCHESTRATION_WS_METHODS,
   type ContextMenuItem,
   type NativeApi,
+  type PatchEvent,
   ServerConfigUpdatedPayload,
   WS_CHANNELS,
   WS_METHODS,
@@ -17,6 +18,7 @@ let instance: { api: NativeApi; transport: WsTransport } | null = null;
 const welcomeListeners = new Set<(payload: WsWelcomePayload) => void>();
 const serverConfigUpdatedListeners = new Set<(payload: ServerConfigUpdatedPayload) => void>();
 const gitActionProgressListeners = new Set<(payload: GitActionProgressEvent) => void>();
+const patchEventListeners = new Set<(payload: PatchEvent) => void>();
 
 /**
  * Subscribe to the server welcome message. If a welcome was already received
@@ -99,6 +101,16 @@ export function createWsNativeApi(): NativeApi {
       }
     }
   });
+  transport.subscribe(WS_CHANNELS.patchEvent, (message) => {
+    const payload = message.data;
+    for (const listener of patchEventListeners) {
+      try {
+        listener(payload);
+      } catch {
+        // Swallow listener errors
+      }
+    }
+  });
 
   const api: NativeApi = {
     dialogs: {
@@ -162,6 +174,22 @@ export function createWsNativeApi(): NativeApi {
         gitActionProgressListeners.add(callback);
         return () => {
           gitActionProgressListeners.delete(callback);
+        };
+      },
+    },
+    patch: {
+      status: (input) => transport.request(WS_METHODS.patchStatus, input),
+      generateProfile: (input) => transport.request(WS_METHODS.patchGenerateProfile, input),
+      reconcile: (input) =>
+        transport.request(WS_METHODS.patchReconcile, input, { timeoutMs: null }),
+      getRun: (input) => transport.request(WS_METHODS.patchGetRun, input),
+      apply: (input) => transport.request(WS_METHODS.patchApply, input, { timeoutMs: null }),
+      openSandbox: (input) => transport.request(WS_METHODS.patchOpenSandbox, input),
+      discardRun: (input) => transport.request(WS_METHODS.patchDiscardRun, input),
+      onEvent: (callback) => {
+        patchEventListeners.add(callback);
+        return () => {
+          patchEventListeners.delete(callback);
         };
       },
     },

@@ -59,3 +59,59 @@ export function resolveAutoFeatureBranchName(
 
   return `${resolvedBase}-${suffix}`;
 }
+
+function parseGitHubRemoteRepository(url: string): string | null {
+  const match =
+    /^(?:git@github\.com:|ssh:\/\/git@github\.com\/|https:\/\/github\.com\/|git:\/\/github\.com\/)([^/\s]+\/[^/\s]+?)(?:\.git)?\/?$/i.exec(
+      url.trim(),
+    );
+  return match?.[1]?.trim() ?? null;
+}
+
+function parseLocalRemoteRepository(url: string): string | null {
+  const trimmed = url.trim();
+  if (trimmed.length === 0) return null;
+
+  let pathValue = trimmed;
+  const schemeMatch = /^([a-z][a-z0-9+.-]*):\/\//i.exec(trimmed);
+  if (schemeMatch) {
+    if (schemeMatch[1]?.toLowerCase() !== "file") return null;
+    try {
+      const parsed = new URL(trimmed);
+      pathValue = `${parsed.host}${decodeURIComponent(parsed.pathname)}`;
+    } catch {
+      return null;
+    }
+  }
+
+  const normalized = pathValue.replace(/\\/g, "/").replace(/\/+$/g, "");
+  const segments = normalized
+    .split("/")
+    .filter((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+  if (segments.length < 2) return null;
+
+  const owner = segments.at(-2)?.trim() ?? "";
+  const repo = segments
+    .at(-1)
+    ?.replace(/\.git$/i, "")
+    .trim();
+  if (owner.length === 0 || !repo || repo.length === 0) return null;
+
+  return `${owner}/${repo}`;
+}
+
+export function parseGitRemoteRepository(url: string): string | null {
+  return parseGitHubRemoteRepository(url) ?? parseLocalRemoteRepository(url);
+}
+
+export function splitRepositoryName(
+  repository: string | null | undefined,
+): { owner: string; repo: string } | null {
+  if (!repository) return null;
+  const [owner = "", repo = ""] = repository.split("/");
+  if (owner.trim().length === 0 || repo.trim().length === 0) return null;
+  return {
+    owner: owner.trim(),
+    repo: repo.trim(),
+  };
+}

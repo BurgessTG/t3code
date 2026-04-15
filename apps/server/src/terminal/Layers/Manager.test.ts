@@ -671,11 +671,18 @@ describe("TerminalManager", () => {
         ),
       ).toBe(true);
     } else {
-      expect(
-        ptyAdapter.spawnInputs.some((input) =>
-          ["/bin/zsh", "/bin/bash", "/bin/sh", "zsh", "bash", "sh"].includes(input.shell),
-        ),
-      ).toBe(true);
+      const expectedFallbackShells = new Set([
+        process.env.SHELL?.split(/\s+/, 1)[0],
+        "/bin/zsh",
+        "/bin/bash",
+        "/bin/sh",
+        "zsh",
+        "bash",
+        "sh",
+      ]);
+      expect(ptyAdapter.spawnInputs.some((input) => expectedFallbackShells.has(input.shell))).toBe(
+        true,
+      );
     }
 
     manager.dispose();

@@ -78,6 +78,7 @@ import { expandHomePath } from "./os-jank.ts";
 import { makeServerPushBus } from "./wsServer/pushBus.ts";
 import { makeServerReadiness } from "./wsServer/readiness.ts";
 import { decodeJsonResult, formatSchemaError } from "@t3tools/shared/schemaJson";
+import { PatchService } from "./patch/Services/PatchService.ts";
 
 /**
  * ServerShape - Service API for server lifecycle control.
@@ -214,6 +215,7 @@ export type ServerRuntimeServices =
   | ServerCoreRuntimeServices
   | GitManager
   | GitCore
+  | PatchService
   | TerminalManager
   | Keybindings
   | Open
@@ -251,6 +253,7 @@ export const createServer = Effect.fn(function* (): Effect.fn.Return<
   const availableEditors = resolveAvailableEditors();
 
   const gitManager = yield* GitManager;
+  const patchService = yield* PatchService;
   const terminalManager = yield* TerminalManager;
   const keybindingsManager = yield* Keybindings;
   const providerHealth = yield* ProviderHealth;
@@ -846,6 +849,56 @@ export const createServer = Effect.fn(function* (): Effect.fn.Return<
       case WS_METHODS.gitInit: {
         const body = stripRequestTag(request.body);
         return yield* git.initRepo(body);
+      }
+
+      case WS_METHODS.patchStatus: {
+        const body = stripRequestTag(request.body);
+        return yield* patchService.status(body);
+      }
+
+      case WS_METHODS.patchGenerateProfile: {
+        const body = stripRequestTag(request.body);
+        return yield* patchService.generateProfile(body);
+      }
+
+      case WS_METHODS.patchReconcile: {
+        const body = stripRequestTag(request.body);
+        return yield* patchService.reconcile(body, {
+          eventPublisher: {
+            publish: (event) =>
+              pushBus.publishClient(ws, WS_CHANNELS.patchEvent, event).pipe(Effect.asVoid),
+          },
+        });
+      }
+
+      case WS_METHODS.patchGetRun: {
+        const body = stripRequestTag(request.body);
+        return yield* patchService.getRun(body);
+      }
+
+      case WS_METHODS.patchApply: {
+        const body = stripRequestTag(request.body);
+        return yield* patchService.apply(body, {
+          eventPublisher: {
+            publish: (event) =>
+              pushBus.publishClient(ws, WS_CHANNELS.patchEvent, event).pipe(Effect.asVoid),
+          },
+        });
+      }
+
+      case WS_METHODS.patchOpenSandbox: {
+        const body = stripRequestTag(request.body);
+        return yield* patchService.openSandbox(body);
+      }
+
+      case WS_METHODS.patchDiscardRun: {
+        const body = stripRequestTag(request.body);
+        return yield* patchService.discardRun(body, {
+          eventPublisher: {
+            publish: (event) =>
+              pushBus.publishClient(ws, WS_CHANNELS.patchEvent, event).pipe(Effect.asVoid),
+          },
+        });
       }
 
       case WS_METHODS.terminalOpen: {

@@ -1,4 +1,6 @@
 import * as Http from "node:http";
+import os from "node:os";
+import path from "node:path";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, it, vi } from "@effect/vitest";
 import type { OrchestrationReadModel } from "@t3tools/contracts";
@@ -21,6 +23,8 @@ import { Server, type ServerShape } from "./wsServer";
 const start = vi.fn(() => undefined);
 const stop = vi.fn(() => undefined);
 let resolvedConfig: ServerConfigShape | null = null;
+const TEST_TMP_ROOT = path.join(os.tmpdir(), `t3-main-test-${process.pid}-${Date.now()}`);
+const tempPath = (...segments: string[]) => path.join(TEST_TMP_ROOT, ...segments);
 const serverStart = Effect.acquireRelease(
   Effect.gen(function* () {
     resolvedConfig = yield* ServerConfig;
@@ -34,7 +38,7 @@ const findAvailablePort = vi.fn((preferred: number) => Effect.succeed(preferred)
 // Shared service layer used by this CLI test suite.
 const testLayer = Layer.mergeAll(
   Layer.succeed(CliConfig, {
-    cwd: "/tmp/t3-test-workspace",
+    cwd: tempPath("workspace"),
     fixPath: Effect.void,
     resolveStaticDir: Effect.undefined,
   } satisfies CliConfigShape),
@@ -93,7 +97,7 @@ it.layer(testLayer)("server CLI command", (it) => {
         "--host",
         "0.0.0.0",
         "--home-dir",
-        "/tmp/t3-cli-home",
+        tempPath("cli-home"),
         "--dev-url",
         "http://127.0.0.1:5173",
         "--no-browser",
@@ -105,8 +109,8 @@ it.layer(testLayer)("server CLI command", (it) => {
       assert.equal(resolvedConfig?.mode, "desktop");
       assert.equal(resolvedConfig?.port, 4010);
       assert.equal(resolvedConfig?.host, "0.0.0.0");
-      assert.equal(resolvedConfig?.baseDir, "/tmp/t3-cli-home");
-      assert.equal(resolvedConfig?.stateDir, "/tmp/t3-cli-home/dev");
+      assert.equal(resolvedConfig?.baseDir, tempPath("cli-home"));
+      assert.equal(resolvedConfig?.stateDir, tempPath("cli-home", "dev"));
       assert.equal(resolvedConfig?.devUrl?.toString(), "http://127.0.0.1:5173/");
       assert.equal(resolvedConfig?.noBrowser, true);
       assert.equal(resolvedConfig?.authToken, "auth-secret");
@@ -131,7 +135,7 @@ it.layer(testLayer)("server CLI command", (it) => {
         T3CODE_MODE: "desktop",
         T3CODE_PORT: "4999",
         T3CODE_HOST: "100.88.10.4",
-        T3CODE_HOME: "/tmp/t3-env-home",
+        T3CODE_HOME: tempPath("env-home"),
         VITE_DEV_SERVER_URL: "http://localhost:5173",
         T3CODE_NO_BROWSER: "true",
         T3CODE_AUTH_TOKEN: "env-token",
@@ -141,8 +145,8 @@ it.layer(testLayer)("server CLI command", (it) => {
       assert.equal(resolvedConfig?.mode, "desktop");
       assert.equal(resolvedConfig?.port, 4999);
       assert.equal(resolvedConfig?.host, "100.88.10.4");
-      assert.equal(resolvedConfig?.baseDir, "/tmp/t3-env-home");
-      assert.equal(resolvedConfig?.stateDir, "/tmp/t3-env-home/dev");
+      assert.equal(resolvedConfig?.baseDir, tempPath("env-home"));
+      assert.equal(resolvedConfig?.stateDir, tempPath("env-home", "dev"));
       assert.equal(resolvedConfig?.devUrl?.toString(), "http://localhost:5173/");
       assert.equal(resolvedConfig?.noBrowser, true);
       assert.equal(resolvedConfig?.authToken, "env-token");
@@ -183,7 +187,7 @@ it.layer(testLayer)("server CLI command", (it) => {
         mode: "desktop",
         port: 4888,
         host: "127.0.0.2",
-        t3Home: "/tmp/t3-bootstrap-home",
+        t3Home: tempPath("bootstrap-home"),
         devUrl: "http://127.0.0.1:5173",
         noBrowser: true,
         authToken: "bootstrap-token",
@@ -199,8 +203,8 @@ it.layer(testLayer)("server CLI command", (it) => {
       assert.equal(resolvedConfig?.mode, "desktop");
       assert.equal(resolvedConfig?.port, 4888);
       assert.equal(resolvedConfig?.host, "127.0.0.2");
-      assert.equal(resolvedConfig?.baseDir, "/tmp/t3-bootstrap-home");
-      assert.equal(resolvedConfig?.stateDir, "/tmp/t3-bootstrap-home/dev");
+      assert.equal(resolvedConfig?.baseDir, tempPath("bootstrap-home"));
+      assert.equal(resolvedConfig?.stateDir, tempPath("bootstrap-home", "dev"));
       assert.equal(resolvedConfig?.devUrl?.toString(), "http://127.0.0.1:5173/");
       assert.equal(resolvedConfig?.noBrowser, true);
       assert.equal(resolvedConfig?.authToken, "bootstrap-token");
@@ -215,7 +219,7 @@ it.layer(testLayer)("server CLI command", (it) => {
         mode: "desktop",
         port: 4888,
         host: "127.0.0.2",
-        t3Home: "/tmp/t3-bootstrap-home",
+        t3Home: tempPath("bootstrap-home"),
         devUrl: "http://127.0.0.1:5173",
         noBrowser: false,
         authToken: "bootstrap-token",
@@ -226,7 +230,7 @@ it.layer(testLayer)("server CLI command", (it) => {
       yield* runCli(["--port", "4999", "--host", "0.0.0.0", "--auth-token", "cli-token"], {
         T3CODE_MODE: "web",
         T3CODE_BOOTSTRAP_FD: String(fd),
-        T3CODE_HOME: "/tmp/t3-env-home",
+        T3CODE_HOME: tempPath("env-home"),
         T3CODE_NO_BROWSER: "true",
         T3CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "true",
         T3CODE_LOG_WS_EVENTS: "true",
@@ -236,7 +240,7 @@ it.layer(testLayer)("server CLI command", (it) => {
       assert.equal(resolvedConfig?.mode, "web");
       assert.equal(resolvedConfig?.port, 4999);
       assert.equal(resolvedConfig?.host, "0.0.0.0");
-      assert.equal(resolvedConfig?.baseDir, "/tmp/t3-env-home");
+      assert.equal(resolvedConfig?.baseDir, tempPath("env-home"));
       assert.equal(resolvedConfig?.devUrl?.toString(), "http://127.0.0.1:5173/");
       assert.equal(resolvedConfig?.noBrowser, true);
       assert.equal(resolvedConfig?.authToken, "cli-token");

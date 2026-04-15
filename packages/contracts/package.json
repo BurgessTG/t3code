@@ -21,7 +21,7 @@
     "build": "tsdown src/index.ts --format esm,cjs --dts --clean",
     "prepare": "effect-language-service patch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "bun ../../scripts/run-vitest.ts --pool=threads --maxWorkers=1"
   },
   "dependencies": {
     "effect": "catalog:"

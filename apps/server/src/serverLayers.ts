@@ -8,6 +8,7 @@ import { ServerConfig } from "./config";
 import { OrchestrationCommandReceiptRepositoryLive } from "./persistence/Layers/OrchestrationCommandReceipts";
 import { OrchestrationEventStoreLive } from "./persistence/Layers/OrchestrationEventStore";
 import { ProviderSessionRuntimeRepositoryLive } from "./persistence/Layers/ProviderSessionRuntime";
+import { PatchRepositoryLive } from "./persistence/Layers/PatchRepository";
 import { OrchestrationEngineLive } from "./orchestration/Layers/OrchestrationEngine";
 import { CheckpointReactorLive } from "./orchestration/Layers/CheckpointReactor";
 import { OrchestrationReactorLive } from "./orchestration/Layers/OrchestrationReactor";
@@ -33,6 +34,7 @@ import { GitHubCliLive } from "./git/Layers/GitHubCli";
 import { RoutingTextGenerationLive } from "./git/Layers/RoutingTextGeneration";
 import { PtyAdapter } from "./terminal/Services/PTY";
 import { AnalyticsService } from "./telemetry/Services/AnalyticsService";
+import { PatchServiceLive } from "./patch/Layers/PatchService";
 
 type RuntimePtyAdapterLoader = {
   layer: Layer.Layer<PtyAdapter, never, FileSystem.FileSystem | Path.Path>;
@@ -131,10 +133,16 @@ export function makeServerRuntimeServicesLayer() {
     Layer.provideMerge(textGenerationLayer),
   );
 
+  const patchServiceLayer = PatchServiceLive.pipe(
+    Layer.provideMerge(GitCoreLive),
+    Layer.provideMerge(PatchRepositoryLive),
+  );
+
   return Layer.mergeAll(
     orchestrationReactorLayer,
     GitCoreLive,
     gitManagerLayer,
+    patchServiceLayer,
     terminalLayer,
     KeybindingsLive,
   ).pipe(Layer.provideMerge(NodeServices.layer));

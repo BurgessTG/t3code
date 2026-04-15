@@ -90,8 +90,6 @@ export const layer = Layer.effect(
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
 
-    const nodePty = yield* Effect.promise(() => import("node-pty"));
-
     const ensureNodePtySpawnHelperExecutableCached = yield* Effect.cached(
       ensureNodePtySpawnHelperExecutable().pipe(
         Effect.provideService(FileSystem.FileSystem, fs),
@@ -103,6 +101,7 @@ export const layer = Layer.effect(
     return {
       spawn: Effect.fn(function* (input) {
         yield* ensureNodePtySpawnHelperExecutableCached;
+        const nodePty = yield* Effect.promise(() => import("node-pty"));
         const ptyProcess = nodePty.spawn(input.shell, input.args ?? [], {
           cwd: input.cwd,
           cols: input.cols,

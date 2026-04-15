@@ -26,6 +26,16 @@ import {
   GitStatusInput,
 } from "./git";
 import {
+  PatchApplyInput,
+  PatchDiscardRunInput,
+  PatchEvent,
+  PatchGenerateProfileInput,
+  PatchGetRunInput,
+  PatchOpenSandboxInput,
+  PatchReconcileInput,
+  PatchStatusInput,
+} from "./patch";
+import {
   TerminalClearInput,
   TerminalCloseInput,
   TerminalEvent,
@@ -65,6 +75,15 @@ export const WS_METHODS = {
   gitResolvePullRequest: "git.resolvePullRequest",
   gitPreparePullRequestThread: "git.preparePullRequestThread",
 
+  // Patch methods
+  patchStatus: "patch.status",
+  patchGenerateProfile: "patch.generateProfile",
+  patchReconcile: "patch.reconcile",
+  patchGetRun: "patch.getRun",
+  patchApply: "patch.apply",
+  patchOpenSandbox: "patch.openSandbox",
+  patchDiscardRun: "patch.discardRun",
+
   // Terminal methods
   terminalOpen: "terminal.open",
   terminalWrite: "terminal.write",
@@ -82,6 +101,7 @@ export const WS_METHODS = {
 
 export const WS_CHANNELS = {
   gitActionProgress: "git.actionProgress",
+  patchEvent: "patch.event",
   terminalEvent: "terminal.event",
   serverWelcome: "server.welcome",
   serverConfigUpdated: "server.configUpdated",
@@ -130,6 +150,15 @@ const WebSocketRequestBody = Schema.Union([
   tagRequestBody(WS_METHODS.gitResolvePullRequest, GitPullRequestRefInput),
   tagRequestBody(WS_METHODS.gitPreparePullRequestThread, GitPreparePullRequestThreadInput),
 
+  // Patch methods
+  tagRequestBody(WS_METHODS.patchStatus, PatchStatusInput),
+  tagRequestBody(WS_METHODS.patchGenerateProfile, PatchGenerateProfileInput),
+  tagRequestBody(WS_METHODS.patchReconcile, PatchReconcileInput),
+  tagRequestBody(WS_METHODS.patchGetRun, PatchGetRunInput),
+  tagRequestBody(WS_METHODS.patchApply, PatchApplyInput),
+  tagRequestBody(WS_METHODS.patchOpenSandbox, PatchOpenSandboxInput),
+  tagRequestBody(WS_METHODS.patchDiscardRun, PatchDiscardRunInput),
+
   // Terminal methods
   tagRequestBody(WS_METHODS.terminalOpen, TerminalOpenInput),
   tagRequestBody(WS_METHODS.terminalWrite, TerminalWriteInput),
@@ -175,6 +204,7 @@ export interface WsPushPayloadByChannel {
   readonly [WS_CHANNELS.serverWelcome]: WsWelcomePayload;
   readonly [WS_CHANNELS.serverConfigUpdated]: typeof ServerConfigUpdatedPayload.Type;
   readonly [WS_CHANNELS.gitActionProgress]: typeof GitActionProgressEvent.Type;
+  readonly [WS_CHANNELS.patchEvent]: typeof PatchEvent.Type;
   readonly [WS_CHANNELS.terminalEvent]: typeof TerminalEvent.Type;
   readonly [ORCHESTRATION_WS_CHANNELS.domainEvent]: OrchestrationEvent;
 }
@@ -202,6 +232,7 @@ export const WsPushGitActionProgress = makeWsPushSchema(
   WS_CHANNELS.gitActionProgress,
   GitActionProgressEvent,
 );
+export const WsPushPatchEvent = makeWsPushSchema(WS_CHANNELS.patchEvent, PatchEvent);
 export const WsPushTerminalEvent = makeWsPushSchema(WS_CHANNELS.terminalEvent, TerminalEvent);
 export const WsPushOrchestrationDomainEvent = makeWsPushSchema(
   ORCHESTRATION_WS_CHANNELS.domainEvent,
@@ -210,6 +241,7 @@ export const WsPushOrchestrationDomainEvent = makeWsPushSchema(
 
 export const WsPushChannelSchema = Schema.Literals([
   WS_CHANNELS.gitActionProgress,
+  WS_CHANNELS.patchEvent,
   WS_CHANNELS.serverWelcome,
   WS_CHANNELS.serverConfigUpdated,
   WS_CHANNELS.terminalEvent,
@@ -221,6 +253,7 @@ export const WsPush = Schema.Union([
   WsPushServerWelcome,
   WsPushServerConfigUpdated,
   WsPushGitActionProgress,
+  WsPushPatchEvent,
   WsPushTerminalEvent,
   WsPushOrchestrationDomainEvent,
 ]);

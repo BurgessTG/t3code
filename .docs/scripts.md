@@ -10,6 +10,7 @@
 - `bun run build` — Builds contracts, web app, and server through Turbo.
 - `bun run typecheck` — Strict TypeScript checks for all packages.
 - `bun run test` — Runs workspace tests.
+- `bun run patch:fixture -- --scenario <clean|content-conflict|rename-conflict|validation-failure>` — Creates a local-only upstream/fork lab for exercising the patch layer without GitHub. See `docs/patch-layer-local-testing.md`.
 - `bun run dist:desktop:artifact -- --platform <mac|linux|win> --target <target> --arch <arch>` — Builds a desktop artifact for a specific platform/target/arch.
 - `bun run dist:desktop:dmg` — Builds a shareable macOS `.dmg` into `./release`.
 - `bun run dist:desktop:dmg:x64` — Builds an Intel macOS `.dmg`.
